@@ -13,6 +13,8 @@
     <modules>
         <module>common</module>
         <module>services</module>
+        <module>api</module>
+        <module>rest</module>
     </modules>
 
     <properties>
@@ -24,6 +26,10 @@
         <mysql.version>5.1.49</mysql.version>
         <dynamic-datasource.version>2.5.6</dynamic-datasource.version>
         <mybatis.plus.version>3.4.2</mybatis.plus.version>
+        <druid.version>1.2.4</druid.version>
+        <lombok.version>1.18.18</lombok.version>
+        <fastjson.version>1.2.75</fastjson.version>
+        <common-lang.version>3.9</common-lang.version>
     </properties>
 
     <dependencyManagement>
@@ -66,6 +72,41 @@
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-boot-starter</artifactId>
                 <version>${mybatis.plus.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid-spring-boot-starter</artifactId>
+                <version>${druid.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>${fastjson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.xhalo.blog</groupId>
+                <artifactId>common</artifactId>
+                <version>${rversion}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.xhalo.blog.api</groupId>
+                <artifactId>user-api</artifactId>
+                <version>${rversion}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.xhalo.blog.api</groupId>
+                <artifactId>article-api</artifactId>
+                <version>${rversion}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${common-lang.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

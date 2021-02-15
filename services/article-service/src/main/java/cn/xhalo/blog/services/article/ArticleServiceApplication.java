@@ -13,7 +13,6 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
  */
 @SpringBootApplication
 @EnableDiscoveryClient
-@EnableFeignClients
 @MapperScan("cn.xhalo.blog.services.*.mapper")
 public class ArticleServiceApplication {
     public static void main(String[] args) {

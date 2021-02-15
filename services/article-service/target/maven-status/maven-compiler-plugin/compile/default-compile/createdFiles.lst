@@ -1,5 +1,1 @@
-cn/xhalo/blog/services/article/config/RestConfig.class
-cn/xhalo/blog/services/article/api/UserAPI.class
 cn/xhalo/blog/services/article/ArticleServiceApplication.class
-cn/xhalo/blog/services/article/controller/TestController.class
-cn/xhalo/blog/services/article/api/fallback/UserAPIFallback.class
