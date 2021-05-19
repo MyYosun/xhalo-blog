@@ -2,12 +2,12 @@ package cn.xhalo.blog.auth.server.service;
 
 import cn.xhalo.blog.auth.server.config.AuthServerProperties;
 import cn.xhalo.blog.auth.server.constant.AuthServerGlobalConstant;
-import cn.xhalo.blog.auth.server.dto.ClientTokenRes;
 import cn.xhalo.blog.auth.server.entity.AuthClient;
 import cn.xhalo.blog.auth.server.entity.ClientToken;
 import cn.xhalo.blog.auth.server.enums.TokenKeyEnum;
 import cn.xhalo.blog.auth.server.util.DateUtil;
 import cn.xhalo.blog.auth.server.util.TokenUtil;
+import cn.xhalo.blog.common.auth.dto.ClientTokenRes;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -31,10 +31,10 @@ public class AuthCommonService<U> {
 
     private final AuthServerProperties authServerProperties;
 
-    public AuthCommonService(AuthClientService authClientService, AuthRedisService authRedisService,
+    public AuthCommonService(AuthClientService authClientService, AuthRedisService authServerRedisService,
                              IAuthUserProvider authUserProvider, AuthServerProperties authServerProperties) {
         this.authClientService = authClientService;
-        this.authRedisService = authRedisService;
+        this.authRedisService = authServerRedisService;
         this.authUserProvider = authUserProvider;
         this.authServerProperties = authServerProperties;
     }
@@ -42,6 +42,7 @@ public class AuthCommonService<U> {
 
     /**
      * 登录码，一般在登录成功后
+     *
      * @param userId
      * @param userIp
      * @param clientId
@@ -66,6 +67,7 @@ public class AuthCommonService<U> {
 
     /**
      * 获取server token，一般在获取到登录码后
+     *
      * @param userIp
      * @param identityCode
      * @return
@@ -86,6 +88,7 @@ public class AuthCommonService<U> {
 
     /**
      * 获取client用于获取client token的鉴权码，一般在获取到server token后
+     *
      * @param clientId
      * @param globalToken
      * @param requestIp
@@ -119,6 +122,7 @@ public class AuthCommonService<U> {
 
     /**
      * 客户端获取token，一般在获取到鉴权码后
+     *
      * @param clientId
      * @param clientSecret
      * @param codeEnhance
@@ -134,7 +138,7 @@ public class AuthCommonService<U> {
         }
         String userId = validateCode(codeEnhance);
 
-        if (StringUtils.isEmpty(userId)){
+        if (StringUtils.isEmpty(userId)) {
             return null;
         }
         String clientToken = TokenUtil.generateClientToken(authClient.getClientId(), authClient.getScope(), userId);
@@ -162,8 +166,8 @@ public class AuthCommonService<U> {
         if (!StringUtils.equals(clientId, clientToken.getClientId())) {
             return null;
         }
-        authRedisService.delete(refreshToken);
         String oldToken = clientToken.getToken();
+        authRedisService.delete(refreshToken);
         if (TokenUtil.isTokenExpire(oldToken)) {
             return null;
         }
@@ -185,6 +189,35 @@ public class AuthCommonService<U> {
 
     }
 
+    public String refreshServerToken(String clientId, String clientSecret, String token, String requestIp) {
+        if (StringUtils.isAnyEmpty(clientId, clientSecret, token)) {
+            return null;
+        }
+        AuthClient authClient = authClientService.validateAuthClient(clientId, clientSecret);
+        if (authClient == null) {
+            return null;
+        }
+
+        String userId = TokenUtil.getTokenClaim(token, TokenKeyEnum.USER_ID.name());
+        if (StringUtils.isEmpty(userId)) {
+            return null;
+        }
+
+        String userIp = authRedisService.getString(userId);
+        if (StringUtils.isEmpty(userIp)) {
+            return null;
+        }
+
+        if (authServerProperties.getOpenSingleUserSinglePlace() && !StringUtils.equals(userIp, requestIp)) {
+            return null;
+        }
+
+        if (!ifTokenNeedRefreshed(token)) {
+            return token;
+        }
+        return refreshToken(token);
+    }
+
     public boolean checkClientToken(String token, String clientSecret, String requestIp) {
         if (StringUtils.isAnyEmpty(token, clientSecret, requestIp)) {
             return false;
@@ -201,6 +234,7 @@ public class AuthCommonService<U> {
 
     /**
      * 通过serverToken登出，并清除redis中用户的登录信息，由于用户校验token的时候会检查redis中的用户登录，因此客户端也间接登出了
+     *
      * @param serverToken
      */
     public void logout(String serverToken) {
@@ -219,6 +253,7 @@ public class AuthCommonService<U> {
 
     /**
      * 通过client token获取用户基础信息
+     *
      * @param clientToken
      * @return
      */
@@ -235,6 +270,7 @@ public class AuthCommonService<U> {
 
     /**
      * 通过client token获取用户详细信息
+     *
      * @param clientToken
      * @return
      */
@@ -251,12 +287,27 @@ public class AuthCommonService<U> {
 
 
     /**
-     * 检查token是否需要刷新
+     * 检查全局token是否需要刷新
      *
      * @param token
      * @return
      */
     public boolean ifTokenNeedRefreshed(String token) {
+        Date expiresAt = TokenUtil.getTokenExpiresAt(token);
+        Date now = new Date();
+        if (now.compareTo(expiresAt) >= 0 || DateUtil.getDiffMinutes(now, expiresAt) > authServerProperties.getRefreshTokenExpireMinutes()) {//已过期 或者 还没到刷新时间点阈值，就不用刷新
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 检查客户端token是否需要刷新
+     *
+     * @param token
+     * @return
+     */
+    public boolean ifClientTokenNeedRefreshed(String token) {
         Date expiresAt = TokenUtil.getTokenExpiresAt(token);
         Date now = new Date();
         if (now.compareTo(expiresAt) >= 0 || DateUtil.getDiffMinutes(now, expiresAt) > authServerProperties.getRefreshClientTokenExpireMinutes()) {//已过期 或者 还没到刷新时间点阈值，就不用刷新
@@ -270,18 +321,18 @@ public class AuthCommonService<U> {
         return TokenUtil.generateServerToken(userId);
     }
 
-    public String generateAndStoreCodeEnhance(String userId) {
+    private String generateAndStoreCodeEnhance(String userId) {
         String code = UUID.randomUUID().toString().replace("-", "");
         authRedisService.setEx(code, userId, authServerProperties.getCodeExpiredSeconds());
         return code;
     }
 
-    public String validateCode(String code) {
+    private String validateCode(String code) {
         String userId = authRedisService.getString(code);
         return userId;
     }
 
-    public String generateAndStoreRefreshToken(String userId, String clientId, String scope, String token) {
+    private String generateAndStoreRefreshToken(String userId, String clientId, String scope, String token) {
         String refreshToken = UUID.randomUUID().toString().replace("-", "");
         ClientToken clientToken = ClientToken.builder()
                 .userId(userId)
@@ -293,7 +344,7 @@ public class AuthCommonService<U> {
         return refreshToken;
     }
 
-    public boolean isTokenDeprecated(String token, String requestIp) {
+    private boolean isTokenDeprecated(String token, String requestIp) {
         String userId = TokenUtil.getTokenClaim(token, TokenKeyEnum.USER_ID.name());
         if (StringUtils.isEmpty(userId)) {
             return true;

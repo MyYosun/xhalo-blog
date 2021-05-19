@@ -1,12 +1,13 @@
-package cn.xhalo.blog.auth.server.config;
+package cn.xhalo.blog.auth.client.config;
 
-import cn.xhalo.blog.auth.server.exception.AuthServerException;
-import cn.xhalo.blog.auth.server.enums.ErrorInfoEnum;
-import cn.xhalo.blog.auth.server.service.AuthRedisService;
-import cn.xhalo.blog.auth.server.util.SpringBeanUtil;
+import cn.xhalo.blog.auth.client.enums.ErrorInfoEnum;
+import cn.xhalo.blog.auth.client.exception.AuthClientException;
+import cn.xhalo.blog.auth.client.service.AuthRedisService;
+import cn.xhalo.blog.auth.client.util.SpringBeanUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,38 +28,39 @@ import javax.annotation.Resource;
  * @Date: 2021/5/18 10:43 上午
  * @Description:
  */
-@EnableConfigurationProperties({AuthServerProperties.class, AuthServerRedisProperties.class})
+@EnableConfigurationProperties({AuthClientProperties.class, AuthClientRedisProperties.class})
+@ConditionalOnWebApplication
 @Configuration
-public class AuthServerAutoConfiguration {
-    private final AuthServerProperties authServerProperties;
-    private final AuthServerRedisProperties authServerRedisProperties;
+public class AuthClientAutoConfiguration {
+    private final AuthClientProperties authClientProperties;
+    private final AuthClientRedisProperties authClientRedisProperties;
 
-    public AuthServerAutoConfiguration(AuthServerProperties authServerProperties,
-                                       AuthServerRedisProperties authServerRedisProperties) {
-        this.authServerProperties = authServerProperties;
-        this.authServerRedisProperties = authServerRedisProperties;
+    public AuthClientAutoConfiguration(AuthClientProperties authClientProperties, AuthClientRedisProperties authClientRedisProperties) {
+        this.authClientProperties = authClientProperties;
+        this.authClientRedisProperties = authClientRedisProperties;
     }
 
-    @Bean(name = "authServerJedisPoolConfig")
-    @ConditionalOnProperty(prefix = "cn.xhalo.auth.server", name = "useExistRedisTemplate", havingValue = "false", matchIfMissing = true)
+
+    @Bean(name = "authClientJedisPoolConfig")
+    @ConditionalOnProperty(prefix = "cn.xhalo.auth.client", name = "useExistRedisTemplate", havingValue = "false", matchIfMissing = true)
     public JedisPoolConfig jedisPoolConfig() {
         JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
-        jedisPoolConfig.setMaxIdle(authServerRedisProperties.getMaxIdle());
-        jedisPoolConfig.setMinIdle(authServerRedisProperties.getMinIdle());
-        jedisPoolConfig.setMaxTotal(authServerRedisProperties.getMaxActive());
-        jedisPoolConfig.setMaxWaitMillis(authServerRedisProperties.getMaxWait());
+        jedisPoolConfig.setMaxIdle(authClientRedisProperties.getMaxIdle());
+        jedisPoolConfig.setMinIdle(authClientRedisProperties.getMinIdle());
+        jedisPoolConfig.setMaxTotal(authClientRedisProperties.getMaxActive());
+        jedisPoolConfig.setMaxWaitMillis(authClientRedisProperties.getMaxWait());
         return jedisPoolConfig;
     }
 
-    @Bean(name = "authServerRedisConnectionFactory")
-    @ConditionalOnBean(name = "authServerJedisPoolConfig")
-    @Resource(name = "authServerJedisPoolConfig")
+    @Bean(name = "authClientRedisConnectionFactory")
+    @ConditionalOnBean(name = "authClientJedisPoolConfig")
+    @Resource(name = "authClientJedisPoolConfig")
     public RedisConnectionFactory redisConnectionFactory(JedisPoolConfig jedisPoolConfig) {
         RedisStandaloneConfiguration redisConfiguration = new RedisStandaloneConfiguration();
-        redisConfiguration.setHostName(authServerRedisProperties.getHost());
-        redisConfiguration.setPort(authServerRedisProperties.getPort());
-        redisConfiguration.setPassword(authServerRedisProperties.getPassword());
-        redisConfiguration.setDatabase(authServerRedisProperties.getDatabase());
+        redisConfiguration.setHostName(authClientRedisProperties.getHost());
+        redisConfiguration.setPort(authClientRedisProperties.getPort());
+        redisConfiguration.setPassword(authClientRedisProperties.getPassword());
+        redisConfiguration.setDatabase(authClientRedisProperties.getDatabase());
         JedisClientConfiguration.JedisPoolingClientConfigurationBuilder clientConfigurationBuilder =
                 (JedisClientConfiguration.JedisPoolingClientConfigurationBuilder)JedisClientConfiguration.builder();
         clientConfigurationBuilder.poolConfig(jedisPoolConfig);
@@ -66,9 +68,9 @@ public class AuthServerAutoConfiguration {
         return factory;
     }
 
-    @Bean(name = "authServerRedisTemplate")
-    @ConditionalOnBean(name = "authServerRedisConnectionFactory")
-    @Resource(name = "authServerRedisConnectionFactory")
+    @Bean(name = "authClientRedisTemplate")
+    @ConditionalOnBean(name = "authClientRedisConnectionFactory")
+    @Resource(name = "authClientRedisConnectionFactory")
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factory) {
         RedisTemplate<String,Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(factory);
@@ -83,22 +85,22 @@ public class AuthServerAutoConfiguration {
         return redisTemplate;
     }
 
-    @Bean(name = "authServerRedisService")
+    @Bean(name = "authClientRedisService")
     @ConditionalOnProperty(prefix = "cn.xhalo.auth.server", name = "useExistRedisTemplate", havingValue = "true")
     public AuthRedisService authRedisServiceFromExist() {
         AuthRedisService authRedisService;
-        if (StringUtils.isEmpty(authServerProperties.getTokenRedisTemplateName())) {
-            throw new AuthServerException(ErrorInfoEnum.INIT_REDIS_ERROR.getCode(), ErrorInfoEnum.INIT_REDIS_ERROR.getMessage());
+        if (StringUtils.isEmpty(authClientProperties.getTokenRedisTemplateName())) {
+            throw new AuthClientException(ErrorInfoEnum.INIT_REDIS_ERROR.getCode(), ErrorInfoEnum.INIT_REDIS_ERROR.getMessage());
         }
         authRedisService = new AuthRedisService(
-                SpringBeanUtil.getBean(authServerProperties.getTokenRedisTemplateName(), RedisTemplate.class)
+                SpringBeanUtil.getBean(authClientProperties.getTokenRedisTemplateName(), RedisTemplate.class)
         );
         return authRedisService;
     }
 
-    @Bean(name = "authServerRedisService")
-    @ConditionalOnBean(name = "authServerRedisTemplate")
-    @Resource(name = "authServerRedisTemplate")
+    @Bean(name = "authClientRedisService")
+    @ConditionalOnBean(name = "authClientRedisTemplate")
+    @Resource(name = "authClientRedisTemplate")
     public AuthRedisService authRedisServiceFromProp(RedisTemplate redisTemplate) {
         AuthRedisService authRedisService = new AuthRedisService(redisTemplate);
         return authRedisService;

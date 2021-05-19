@@ -19,9 +19,9 @@ public class AuthClientService {
 
     private final AuthRedisService authRedisService;
 
-    public AuthClientService(IAuthClientProvider authClientProvider, AuthRedisService authRedisService) {
+    public AuthClientService(IAuthClientProvider authClientProvider, AuthRedisService authServerRedisService) {
         this.authClientProvider = authClientProvider;
-        this.authRedisService = authRedisService;
+        this.authRedisService = authServerRedisService;
     }
 
     public void registerAuthClients() {

@@ -1,4 +1,4 @@
-package cn.xhalo.blog.auth.server.Exception;
+package cn.xhalo.blog.auth.client.exception;
 
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
@@ -9,38 +9,38 @@ import org.apache.commons.lang3.StringUtils;
  * @Description:
  */
 @Data
-public class AuthServerException extends RuntimeException {
+public class AuthClientException extends RuntimeException {
     protected String errorCode;
     protected String errorMsg;
     protected Throwable ex;
 
-    public AuthServerException() {
+    public AuthClientException() {
         super();
     }
 
-    public AuthServerException(String code, String message) {
+    public AuthClientException(String code, String message) {
         super(message);
         this.setErrorCode(code);
         this.setErrorMsg(message);
     }
 
-    public AuthServerException(String message) {
+    public AuthClientException(String message) {
         super(message);
         this.setErrorMsg(message);
     }
 
-    public AuthServerException(String message, Throwable cause) {
+    public AuthClientException(String message, Throwable cause) {
         super(message, cause);
         this.setErrorMsg(message);
         this.setEx(cause);
     }
 
-    public AuthServerException(Throwable cause) {
+    public AuthClientException(Throwable cause) {
         super(cause);
         this.setEx(cause);
     }
 
-    public AuthServerException(String code, String message, Throwable cause) {
+    public AuthClientException(String code, String message, Throwable cause) {
         super(message, cause);
         this.setErrorCode(code);
         this.setErrorMsg(message);

@@ -1,4 +1,4 @@
-package cn.xhalo.blog.auth.server.dto;
+package cn.xhalo.blog.common.auth.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

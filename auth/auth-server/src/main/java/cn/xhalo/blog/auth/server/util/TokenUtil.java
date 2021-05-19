@@ -42,7 +42,7 @@ public class TokenUtil {
      *
      * @return
      */
-    public static Date getExpiresAt(Long expireSeconds) {
+    private static Date getExpiresAt(Long expireSeconds) {
         LocalDateTime localDateTime = LocalDateTime.now().plusSeconds(expireSeconds);
         return DateUtil.localDateTimeToDate(localDateTime);
     }
@@ -74,45 +74,61 @@ public class TokenUtil {
     }
 
     public static boolean verifyToken(String token) {
-        RSAPublicKey publicKey = RSAUtil.getPublicKey();
-        RSAPrivateKey privateKey = RSAUtil.getPrivateKey();
-        boolean rs = false;
         try {
-            //检查jwt有效性
-            Algorithm algorithm = Algorithm.RSA256(publicKey, privateKey);
-            JWTVerifier verifier = JWT.require(algorithm)
-                    .build(); //Reusable verifier instance
-            verifier.verify(token);
-            rs = true;
-        } catch (InvalidClaimException e) {
-            log.error(ErrorInfoEnum.TOKEN_EXPIRE.getMessage(), e);
-        } catch (JWTDecodeException e) {
-            log.error(ErrorInfoEnum.TOKEN_INVALID.getMessage(), e);
+            RSAPublicKey publicKey = RSAUtil.getPublicKey();
+            RSAPrivateKey privateKey = RSAUtil.getPrivateKey();
+            boolean rs = false;
+            try {
+                //检查jwt有效性
+                Algorithm algorithm = Algorithm.RSA256(publicKey, privateKey);
+                JWTVerifier verifier = JWT.require(algorithm)
+                        .build(); //Reusable verifier instance
+                verifier.verify(token);
+                rs = true;
+            } catch (InvalidClaimException e) {
+                log.error(ErrorInfoEnum.TOKEN_EXPIRE.getMessage(), e);
+            } catch (JWTDecodeException e) {
+                log.error(ErrorInfoEnum.TOKEN_INVALID.getMessage(), e);
+            }
+            return rs;
+        } catch (Exception e) {
+            return false;
         }
-        return rs;
     }
 
     public static String getTokenClaim(String token, String key) {
-        DecodedJWT jwt = JWT.decode(token);
-        Claim claim = jwt.getClaim(key);
-        if (claim == null) {
+        try {
+            DecodedJWT jwt = JWT.decode(token);
+            Claim claim = jwt.getClaim(key);
+            if (claim == null) {
+                return null;
+            }
+            return claim.asString();
+        } catch (Exception e) {
             return null;
         }
-        return claim.asString();
     }
 
     public static Date getTokenExpiresAt(String token) {
-        DecodedJWT jwt = JWT.decode(token);
-        return jwt.getExpiresAt();
+        try {
+            DecodedJWT jwt = JWT.decode(token);
+            return jwt.getExpiresAt();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public static boolean isTokenExpire(String token) {
-        Long expireTime = getTokenExpiresAt(token).getTime();
-        Long nowTime = System.currentTimeMillis();
-        if (expireTime < nowTime) {
+        try {
+            Long expireTime = getTokenExpiresAt(token).getTime();
+            Long nowTime = System.currentTimeMillis();
+            if (expireTime < nowTime) {
+                return false;
+            }
+            return true;
+        }  catch (Exception e) {
             return false;
         }
-        return true;
     }
 
 }

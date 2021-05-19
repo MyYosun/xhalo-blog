@@ -1,4 +1,4 @@
-package cn.xhalo.blog.auth.server.util;
+package cn.xhalo.blog.auth.client.util;
 
 import org.apache.commons.codec.binary.Base64;
 
