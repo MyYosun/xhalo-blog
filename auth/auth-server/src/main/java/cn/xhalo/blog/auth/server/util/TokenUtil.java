@@ -73,7 +73,7 @@ public class TokenUtil {
                 .sign(algorithm);
     }
 
-    public static boolean verifyServerToken(String token) {
+    public static boolean verifyToken(String token) {
         RSAPublicKey publicKey = RSAUtil.getPublicKey();
         RSAPrivateKey privateKey = RSAUtil.getPrivateKey();
         boolean rs = false;

@@ -37,6 +37,9 @@ public class AuthClientService {
 
 
     public AuthClient validateAuthClient(String clientId, String clientSecret) {
+        if (StringUtils.isAnyEmpty(clientId, clientSecret)) {
+            return null;
+        }
         AuthClient client = authRedisService.get(clientId, AuthClient.class);
         if (client != null && clientSecreteEquals(clientSecret, client.getClientSecret())) {
             return client;

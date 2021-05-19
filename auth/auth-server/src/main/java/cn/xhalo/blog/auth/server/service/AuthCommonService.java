@@ -22,16 +22,20 @@ import java.util.concurrent.TimeUnit;
  * @Description: 正常步骤，登录->获取server token->获取鉴权码codeEnhance->获取client token
  */
 @Service
-public class AuthCommonService {
+public class AuthCommonService<U> {
 
     private final AuthClientService authClientService;
     private final AuthRedisService authRedisService;
 
+    private final IAuthUserProvider<U> authUserProvider;
+
     private final AuthServerProperties authServerProperties;
 
-    public AuthCommonService(AuthClientService authClientService, AuthRedisService authRedisService, AuthServerProperties authServerProperties) {
+    public AuthCommonService(AuthClientService authClientService, AuthRedisService authRedisService,
+                             IAuthUserProvider authUserProvider, AuthServerProperties authServerProperties) {
         this.authClientService = authClientService;
         this.authRedisService = authRedisService;
+        this.authUserProvider = authUserProvider;
         this.authServerProperties = authServerProperties;
     }
 
@@ -96,7 +100,7 @@ public class AuthCommonService {
             return null;
         }
 
-        if (StringUtils.isEmpty(globalToken) || !TokenUtil.verifyServerToken(globalToken)) {
+        if (StringUtils.isEmpty(globalToken) || !TokenUtil.verifyToken(globalToken)) {
             return null;
         }
         String userId = TokenUtil.getTokenClaim(globalToken, TokenKeyEnum.USER_ID.name());
@@ -181,6 +185,70 @@ public class AuthCommonService {
 
     }
 
+    public boolean checkClientToken(String token, String clientSecret, String requestIp) {
+        if (StringUtils.isAnyEmpty(token, clientSecret, requestIp)) {
+            return false;
+        }
+        if (authClientService.validateAuthClient(
+                TokenUtil.getTokenClaim(token, TokenKeyEnum.USER_ID.name()), clientSecret) == null) {
+            return false;
+        }
+        if ((!TokenUtil.verifyToken(token)) || isTokenDeprecated(token, requestIp)) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 通过serverToken登出，并清除redis中用户的登录信息，由于用户校验token的时候会检查redis中的用户登录，因此客户端也间接登出了
+     * @param serverToken
+     */
+    public void logout(String serverToken) {
+        if (StringUtils.isEmpty(serverToken)) {
+            return;
+        }
+        if (!TokenUtil.verifyToken(serverToken)) {
+            return;
+        }
+        String userId = TokenUtil.getTokenClaim(serverToken, TokenKeyEnum.USER_ID.name());
+        if (StringUtils.isEmpty(userId)) {
+            return;
+        }
+        authRedisService.delete(userId);
+    }
+
+    /**
+     * 通过client token获取用户基础信息
+     * @param clientToken
+     * @return
+     */
+    public U getBaseUserByClientToken(String clientToken) {
+        if (StringUtils.isEmpty(clientToken)) {
+            return null;
+        }
+        String userId = TokenUtil.getTokenClaim(clientToken, TokenKeyEnum.USER_ID.name());
+        if (StringUtils.isEmpty(userId)) {
+            return null;
+        }
+        return authUserProvider.getBaseUserByUserId(userId);
+    }
+
+    /**
+     * 通过client token获取用户详细信息
+     * @param clientToken
+     * @return
+     */
+    public U getDetailUserByClientToken(String clientToken) {
+        if (StringUtils.isEmpty(clientToken)) {
+            return null;
+        }
+        String userId = TokenUtil.getTokenClaim(clientToken, TokenKeyEnum.USER_ID.name());
+        if (StringUtils.isEmpty(userId)) {
+            return null;
+        }
+        return authUserProvider.getBaseUserByUserId(userId);
+    }
+
 
     /**
      * 检查token是否需要刷新
@@ -223,6 +291,24 @@ public class AuthCommonService {
                 .build();
         authRedisService.setEx(refreshToken, clientToken, authServerProperties.getRefreshClientTokenExpireMinutes(), TimeUnit.MINUTES);
         return refreshToken;
+    }
+
+    public boolean isTokenDeprecated(String token, String requestIp) {
+        String userId = TokenUtil.getTokenClaim(token, TokenKeyEnum.USER_ID.name());
+        if (StringUtils.isEmpty(userId)) {
+            return true;
+        }
+        String userIp = authRedisService.getString(userId);
+        if (StringUtils.isEmpty(userIp)) {
+            return true;
+        }
+        if ((!StringUtils.equals(requestIp, userId)) && authServerProperties.getOpenSingleUserSinglePlace()) {
+            return true;
+        }
+        if (authServerProperties.getRefreshTokenAfterOperate()) {
+            authRedisService.setEx(userId, requestIp, authServerProperties.getTokenExpireSeconds());
+        }
+        return false;
     }
 
 }
