@@ -1,0 +1,1 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=cn.xhalo.blog.auth.server.config.AuthServerAutoConfiguration

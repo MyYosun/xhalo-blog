@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(value = "/test")
 public class TestController {
-    @DubboReference(version = BaseConstant.DUBBO_DEFAULT_VERSION)
+    @DubboReference(version = BaseConstant.DUBBO_DEFAULT_VERSION, check = false)
     private UserService userService;
 
     @PostMapping(value = "/demo")

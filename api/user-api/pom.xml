@@ -17,4 +17,12 @@
         <maven.compiler.target>8</maven.compiler.target>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>cn.xhalo.blog</groupId>
+            <artifactId>common</artifactId>
+            <version>${rversion}</version>
+        </dependency>
+    </dependencies>
+
 </project>

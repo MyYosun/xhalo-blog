@@ -15,6 +15,7 @@
         <module>services</module>
         <module>api</module>
         <module>rest</module>
+        <module>auth</module>
     </modules>
 
     <properties>

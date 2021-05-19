@@ -3,56 +3,60 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>services</artifactId>
+        <artifactId>parent</artifactId>
         <groupId>cn.xhalo.blog</groupId>
         <version>${rversion}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>user-service</artifactId>
+    <groupId>cn.xhalo.blog</groupId>
+    <artifactId>auth</artifactId>
+    <packaging>pom</packaging>
     <version>${rversion}</version>
+
+    <modules>
+        <module>auth-client</module>
+        <module>auth-server</module>
+    </modules>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
+        <jwt.version>3.16.0</jwt.version>
+        <jedis.version>3.3.0</jedis.version>
+        <codec.version>1.15</codec.version>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>cn.xhalo.blog.api</groupId>
-            <artifactId>user-api</artifactId>
+            <groupId>cn.xhalo.blog</groupId>
+            <artifactId>common</artifactId>
+            <version>${rversion}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>java-jwt</artifactId>
+            <version>${jwt.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>${jedis.version}</version>
         </dependency>
 
         <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>${codec.version}</version>
         </dependency>
 
-        <!-- mysql connector -->
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-        </dependency>
-        <!-- 动态数据源 -->
-        <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>dynamic-datasource-spring-boot-starter</artifactId>
-        </dependency>
-        <!-- mybatis plus  -->
-        <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-boot-starter</artifactId>
-        </dependency>
 
     </dependencies>
 
@@ -64,5 +68,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

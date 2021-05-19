@@ -11,7 +11,7 @@ import org.apache.dubbo.config.annotation.DubboService;
  * @Date: 2021/2/15 11:18 下午
  * @Description:
  */
-@DubboService(version = BaseConstant.DUBBO_DEFAULT_VERSION, timeout = BaseConstant.DUBBO_DEFAULT_TIMEOUT)
+@DubboService(version = BaseConstant.DUBBO_DEFAULT_VERSION, timeout = BaseConstant.DUBBO_DEFAULT_TIMEOUT, retries = BaseConstant.DUBBO_RETRY_TIMES)
 public class UserServiceImpl implements UserService {
 
     @Override

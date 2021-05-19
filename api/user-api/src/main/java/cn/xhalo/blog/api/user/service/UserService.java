@@ -10,4 +10,5 @@ import cn.xhalo.blog.common.dto.PublicResponseParam;
  */
 public interface UserService {
     PublicResponseParam demo(PublicRequestParam publicRequestParam);
+
 }
