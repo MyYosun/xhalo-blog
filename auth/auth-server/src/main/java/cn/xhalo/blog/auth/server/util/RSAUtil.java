@@ -22,11 +22,7 @@ public class RSAUtil {
     private static AuthServerProperties authServerProperties;
 
     public static void init() {
-        if (authServerProperties == null) {
-            synchronized (authServerProperties) {
-                authServerProperties = SpringBeanUtil.getBean(AuthServerProperties.class);
-            }
-        }
+        authServerProperties = SpringBeanUtil.getBean(AuthServerProperties.class);
     }
 
     public static Key convertStringToPublicKey(String publicKey) throws NoSuchAlgorithmException, InvalidKeySpecException {

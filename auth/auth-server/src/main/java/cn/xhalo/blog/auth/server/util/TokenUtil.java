@@ -30,11 +30,7 @@ public class TokenUtil {
     private static AuthServerProperties authServerProperties;
 
     public static void init() {
-        if (authServerProperties == null) {
-            synchronized (authServerProperties) {
-                authServerProperties = SpringBeanUtil.getBean(AuthServerProperties.class);
-            }
-        }
+        authServerProperties = SpringBeanUtil.getBean(AuthServerProperties.class);
     }
 
     /**

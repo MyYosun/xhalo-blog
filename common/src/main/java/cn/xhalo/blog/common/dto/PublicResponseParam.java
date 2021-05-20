@@ -4,6 +4,7 @@ import cn.xhalo.blog.common.constant.BaseConstant;
 import cn.xhalo.blog.common.enums.BaseCodeConst;
 import com.alibaba.fastjson.annotation.JSONField;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -17,6 +18,7 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class PublicResponseParam implements Serializable {
     private String code;
     private String message;
@@ -42,19 +44,6 @@ public class PublicResponseParam implements Serializable {
         response.setOpenTime(System.currentTimeMillis());
         response.setVersion(BaseConstant.VERSION);
         return response;
-    }
-
-    public static PublicResponseParam build() {
-        PublicResponseParam response = new PublicResponseParam();
-        return response.version(BaseConstant.VERSION).openTime(System.currentTimeMillis());
-    }
-
-    public static PublicResponseParam build(String code, String message) {
-        return PublicResponseParam.build().code(code).message(message);
-    }
-
-    public static PublicResponseParam build(String code, String message, Object data) {
-        return PublicResponseParam.build().code(code).message(message).data(data);
     }
 
     public PublicResponseParam code(String code) {

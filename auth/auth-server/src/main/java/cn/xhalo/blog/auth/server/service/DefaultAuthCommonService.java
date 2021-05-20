@@ -221,7 +221,7 @@ public class DefaultAuthCommonService<U> {
             return false;
         }
         if (authClientService.validateAuthClient(
-                TokenUtil.getTokenClaim(token, TokenKeyEnum.USER_ID.name()), clientSecret) == null) {
+                TokenUtil.getTokenClaim(token, TokenKeyEnum.CLIENT_ID.name()), clientSecret) == null) {
             return false;
         }
         if ((!TokenUtil.verifyToken(token)) || isTokenDeprecated(token, requestIp)) {
@@ -357,7 +357,7 @@ public class DefaultAuthCommonService<U> {
         if (StringUtils.isEmpty(userIp)) {
             return true;
         }
-        if ((!StringUtils.equals(requestIp, userId)) && authServerProperties.getOpenSingleUserSinglePlace()) {
+        if ((!StringUtils.equals(requestIp, userIp)) && authServerProperties.getOpenSingleUserSinglePlace()) {
             return true;
         }
         if (authServerProperties.getRefreshTokenAfterOperate()) {

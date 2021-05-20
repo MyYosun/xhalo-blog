@@ -106,4 +106,9 @@ public class AuthClientAutoConfiguration {
         AuthRedisService authRedisService = new AuthRedisService(redisTemplate);
         return authRedisService;
     }
+
+    @Bean
+    public SpringBeanUtil springBeanUtil() {
+        return new SpringBeanUtil();
+    }
 }

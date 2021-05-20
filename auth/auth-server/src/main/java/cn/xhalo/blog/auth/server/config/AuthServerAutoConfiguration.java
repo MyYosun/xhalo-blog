@@ -2,6 +2,7 @@ package cn.xhalo.blog.auth.server.config;
 
 import cn.xhalo.blog.auth.server.exception.AuthServerException;
 import cn.xhalo.blog.auth.server.enums.ErrorInfoEnum;
+import cn.xhalo.blog.auth.server.helper.StartWhenSpringRunHelper;
 import cn.xhalo.blog.auth.server.service.AuthClientService;
 import cn.xhalo.blog.auth.server.service.AuthRedisService;
 import cn.xhalo.blog.auth.server.service.IAuthClientProvider;
@@ -10,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -109,5 +111,16 @@ public class AuthServerAutoConfiguration {
     @Bean(name = "authClientService")
     public AuthClientService authClientService(IAuthClientProvider authClientProvider, AuthRedisService authServerRedisService) {
         return new AuthClientService(authClientProvider, authServerRedisService);
+    }
+
+    @Bean(name = "startWhenSpringRunHelper")
+    @ConditionalOnBean(name = "authClientService")
+    public StartWhenSpringRunHelper startWhenSpringRunHelper(AuthClientService authClientService) {
+        return new StartWhenSpringRunHelper(authClientService);
+    }
+
+    @Bean
+    public SpringBeanUtil springBeanUtil() {
+        return new SpringBeanUtil();
     }
 }
