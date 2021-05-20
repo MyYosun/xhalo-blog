@@ -15,6 +15,8 @@ public class AuthClientProperties {
     private String clientSecret;
     private Boolean openFilter;
     private String md5Salt;
+    private String excludeFilterPath;
+    private String excludeFilterPathEndWith;
 
     /**
      * 用来存储token的redisTemplate的bean名字

@@ -105,6 +105,16 @@
                 <version>${rversion}</version>
             </dependency>
             <dependency>
+                <groupId>cn.xhalo.blog.auth</groupId>
+                <artifactId>auth-server</artifactId>
+                <version>${rversion}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.xhalo.blog.auth</groupId>
+                <artifactId>auth-client</artifactId>
+                <version>${rversion}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
                 <version>${common-lang.version}</version>

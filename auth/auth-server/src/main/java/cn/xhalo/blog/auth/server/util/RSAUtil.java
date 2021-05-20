@@ -2,8 +2,7 @@ package cn.xhalo.blog.auth.server.util;
 
 
 import cn.xhalo.blog.auth.server.config.AuthServerProperties;
-import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
-import com.sun.org.apache.xml.internal.security.utils.Base64;
+import org.apache.commons.codec.binary.Base64;
 
 import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
@@ -30,16 +29,16 @@ public class RSAUtil {
         }
     }
 
-    public static Key convertStringToPublicKey(String publicKey) throws Base64DecodingException, NoSuchAlgorithmException, InvalidKeySpecException {
-        byte[] data = Base64.decode(publicKey.getBytes());
+    public static Key convertStringToPublicKey(String publicKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        byte[] data = Base64.decodeBase64(publicKey.getBytes());
         X509EncodedKeySpec spec = new X509EncodedKeySpec(data);
         KeyFactory fact = KeyFactory.getInstance("RSA");
         return fact.generatePublic(spec);
     }
 
 
-    public static Key convertStringToPrivateKey(String privateKey) throws Base64DecodingException, NoSuchAlgorithmException, InvalidKeySpecException {
-        byte[] clear = Base64.decode(privateKey.getBytes());
+    public static Key convertStringToPrivateKey(String privateKey) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        byte[] clear = Base64.decodeBase64(privateKey.getBytes());
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(clear);
         KeyFactory fact = KeyFactory.getInstance("RSA");
         PrivateKey priv = fact.generatePrivate(keySpec);
@@ -51,8 +50,6 @@ public class RSAUtil {
         RSAPrivateKey privateKey = null;
         try {
             privateKey = (RSAPrivateKey) RSAUtil.convertStringToPrivateKey(authServerProperties.getTokenRSAPrivateKey());
-        } catch (Base64DecodingException e) {
-            e.printStackTrace();
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         } catch (InvalidKeySpecException e) {
@@ -65,8 +62,6 @@ public class RSAUtil {
         RSAPublicKey publicKey = null;
         try {
             publicKey = (RSAPublicKey) RSAUtil.convertStringToPublicKey(authServerProperties.getTokenRSAPublicKey());
-        } catch (Base64DecodingException e) {
-            e.printStackTrace();
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         } catch (InvalidKeySpecException e) {

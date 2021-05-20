@@ -54,6 +54,11 @@
             <artifactId>mybatis-plus-boot-starter</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>cn.xhalo.blog.auth</groupId>
+            <artifactId>auth-server</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

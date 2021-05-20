@@ -24,4 +24,6 @@ public class GlobalUserDTO implements Serializable {
     private String mobile;
     private Date lastLoginTime;
     private Date createTime;
+    private String headImg;
+    private String introduction;
 }

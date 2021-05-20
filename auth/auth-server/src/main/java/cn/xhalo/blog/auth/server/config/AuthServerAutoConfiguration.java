@@ -2,7 +2,9 @@ package cn.xhalo.blog.auth.server.config;
 
 import cn.xhalo.blog.auth.server.exception.AuthServerException;
 import cn.xhalo.blog.auth.server.enums.ErrorInfoEnum;
+import cn.xhalo.blog.auth.server.service.AuthClientService;
 import cn.xhalo.blog.auth.server.service.AuthRedisService;
+import cn.xhalo.blog.auth.server.service.IAuthClientProvider;
 import cn.xhalo.blog.auth.server.util.SpringBeanUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -102,5 +104,10 @@ public class AuthServerAutoConfiguration {
     public AuthRedisService authRedisServiceFromProp(RedisTemplate redisTemplate) {
         AuthRedisService authRedisService = new AuthRedisService(redisTemplate);
         return authRedisService;
+    }
+
+    @Bean(name = "authClientService")
+    public AuthClientService authClientService(IAuthClientProvider authClientProvider, AuthRedisService authServerRedisService) {
+        return new AuthClientService(authClientProvider, authServerRedisService);
     }
 }

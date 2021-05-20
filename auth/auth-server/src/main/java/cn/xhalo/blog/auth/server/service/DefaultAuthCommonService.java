@@ -10,7 +10,6 @@ import cn.xhalo.blog.auth.server.util.TokenUtil;
 import cn.xhalo.blog.common.auth.dto.ClientTokenRes;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.UUID;
@@ -21,8 +20,7 @@ import java.util.concurrent.TimeUnit;
  * @Date: 2021/5/18 4:32 下午
  * @Description: 正常步骤，登录->获取server token->获取鉴权码codeEnhance->获取client token
  */
-@Service
-public class AuthCommonService<U> {
+public class DefaultAuthCommonService<U> {
 
     private final AuthClientService authClientService;
     private final AuthRedisService authRedisService;
@@ -31,8 +29,8 @@ public class AuthCommonService<U> {
 
     private final AuthServerProperties authServerProperties;
 
-    public AuthCommonService(AuthClientService authClientService, AuthRedisService authServerRedisService,
-                             IAuthUserProvider authUserProvider, AuthServerProperties authServerProperties) {
+    public DefaultAuthCommonService(AuthClientService authClientService, AuthRedisService authServerRedisService,
+                                    IAuthUserProvider authUserProvider, AuthServerProperties authServerProperties) {
         this.authClientService = authClientService;
         this.authRedisService = authServerRedisService;
         this.authUserProvider = authUserProvider;
@@ -293,6 +291,9 @@ public class AuthCommonService<U> {
      * @return
      */
     public boolean ifTokenNeedRefreshed(String token) {
+        if (!authServerProperties.getRefreshTokenAfterOperate()) {
+            return false;
+        }
         Date expiresAt = TokenUtil.getTokenExpiresAt(token);
         Date now = new Date();
         if (now.compareTo(expiresAt) >= 0 || DateUtil.getDiffMinutes(now, expiresAt) > authServerProperties.getRefreshTokenExpireMinutes()) {//已过期 或者 还没到刷新时间点阈值，就不用刷新
@@ -308,6 +309,9 @@ public class AuthCommonService<U> {
      * @return
      */
     public boolean ifClientTokenNeedRefreshed(String token) {
+        if (!authServerProperties.getRefreshTokenAfterOperate()) {
+            return false;
+        }
         Date expiresAt = TokenUtil.getTokenExpiresAt(token);
         Date now = new Date();
         if (now.compareTo(expiresAt) >= 0 || DateUtil.getDiffMinutes(now, expiresAt) > authServerProperties.getRefreshClientTokenExpireMinutes()) {//已过期 或者 还没到刷新时间点阈值，就不用刷新

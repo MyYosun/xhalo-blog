@@ -3,7 +3,6 @@ package cn.xhalo.blog.auth.server.service;
 import cn.xhalo.blog.auth.server.entity.AuthClient;
 import cn.xhalo.blog.auth.server.util.HashUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -12,7 +11,6 @@ import java.util.List;
  * @Date: 2021/5/18 1:33 下午
  * @Description: 接入客户端的服务
  */
-@Service
 public class AuthClientService {
 
     private final IAuthClientProvider authClientProvider;

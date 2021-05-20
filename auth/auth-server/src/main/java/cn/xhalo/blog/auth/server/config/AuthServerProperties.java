@@ -11,7 +11,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "cn.xhalo.auth.server")
 @Data
 public class AuthServerProperties {
-    private String serverName;
     private Boolean openSingleUserSinglePlace;
     /**
      *   请求token的code的过期时间，单位seconds

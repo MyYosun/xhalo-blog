@@ -21,7 +21,6 @@ import java.util.Date;
  * @Date: 2021/5/19 2:56 下午
  * @Description:
  */
-@Service
 public class AuthClientService<U> {
     private final IAuthCommonService<U> authCommonService;
     private final AuthRedisService authRedisService;
@@ -61,7 +60,7 @@ public class AuthClientService<U> {
             throw new AuthClientException(ErrorInfoEnum.GET_GLOBAL_TOKEN_ERROR.getCode(), ErrorInfoEnum.GET_GLOBAL_TOKEN_ERROR.getMessage());
         }
         String codeEnhance = authCommonService.getCodeEnhance(clientId, globalToken, requestIp);
-        if (globalToken == null) {
+        if (codeEnhance == null) {
             throw new AuthClientException(ErrorInfoEnum.GET_CLIENT_CODE_ERROR.getCode(), ErrorInfoEnum.GET_CLIENT_CODE_ERROR.getMessage());
         }
         ClientTokenRes clientToken = authCommonService.getClientToken(clientId, clientSecret, codeEnhance);
@@ -69,6 +68,29 @@ public class AuthClientService<U> {
             throw new AuthClientException(ErrorInfoEnum.GET_CLIENT_TOKEN_ERROR.getCode(), ErrorInfoEnum.GET_CLIENT_TOKEN_ERROR.getMessage());
         }
         setGlobalToken(response, globalToken);
+        setClientToken(response, clientToken);
+    }
+
+    /**
+     * 在token校验失败后处理
+     * @param request
+     * @param response
+     * @throws AuthClientException
+     */
+    public void afterTokenCheckFalse(HttpServletRequest request, HttpServletResponse response) throws AuthClientException {
+        String globalToken = getGlobalToken(request);
+        if (StringUtils.isEmpty(globalToken)) {
+            throw new AuthClientException(ErrorInfoEnum.TOKEN_INVALID.getCode(), ErrorInfoEnum.TOKEN_INVALID.getMessage());
+        }
+        String requestIp = RequestUtil.getRemoteAddr(request);
+        String codeEnhance = authCommonService.getCodeEnhance(clientId, globalToken, requestIp);
+        if (codeEnhance == null) {
+            throw new AuthClientException(ErrorInfoEnum.GET_CLIENT_CODE_ERROR.getCode(), ErrorInfoEnum.GET_CLIENT_CODE_ERROR.getMessage());
+        }
+        ClientTokenRes clientToken = authCommonService.getClientToken(clientId, clientSecret, codeEnhance);
+        if (clientToken == null) {
+            throw new AuthClientException(ErrorInfoEnum.GET_CLIENT_TOKEN_ERROR.getCode(), ErrorInfoEnum.GET_CLIENT_TOKEN_ERROR.getMessage());
+        }
         setClientToken(response, clientToken);
     }
 
@@ -113,7 +135,7 @@ public class AuthClientService<U> {
         authCommonService.logout(token);
     }
 
-    public boolean checkClientToken(HttpServletRequest request, HttpServletResponse response) {
+    public boolean checkClientToken(HttpServletRequest request) {
         ClientTokenRes clientTokenRes = getClientToken(request);
         if (clientTokenRes == null) {
             return false;

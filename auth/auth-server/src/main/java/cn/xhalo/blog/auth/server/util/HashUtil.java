@@ -24,7 +24,9 @@ public class HashUtil {
     public static void main(String[] args) throws Exception {
         String uuid = generateUUID();
         System.out.println("uuid =" + uuid);
-        String originalPassword = "password";
+        String md5UUID = md5(uuid);
+        System.out.println(md5UUID);
+        /*String originalPassword = "password";
         String generatedSecuredPasswordHash = generateStrongPasswordHash(originalPassword);
         System.out.println(generatedSecuredPasswordHash);
         boolean matched = validatePassword("password", generatedSecuredPasswordHash);
@@ -37,7 +39,7 @@ public class HashUtil {
         matched = validatePassword("123456", generatedSecuredPasswordHash);
         System.out.println(matched);
         matched = validatePassword("1234567", generatedSecuredPasswordHash);
-        System.out.println(matched);
+        System.out.println(matched);*/
     }
 
     private HashUtil() {

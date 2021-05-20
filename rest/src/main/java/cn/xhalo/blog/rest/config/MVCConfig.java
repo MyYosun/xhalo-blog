@@ -1,11 +1,15 @@
 package cn.xhalo.blog.rest.config;
 
+import cn.xhalo.blog.api.user.dto.GlobalUserDTO;
+import cn.xhalo.blog.auth.client.interceptor.AuthClientInterceptor;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
 import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 
 import java.util.ArrayList;
@@ -18,6 +22,8 @@ import java.util.List;
  */
 @Configuration
 public class MVCConfig extends WebMvcConfigurationSupport {
+
+    private AuthClientInterceptor<GlobalUserDTO> authClientInterceptor;
     /**
      * 配置fastjson为message解析
      * @param converters
@@ -49,5 +55,17 @@ public class MVCConfig extends WebMvcConfigurationSupport {
         fastJsonConfig.setSerializerFeatures(SerializerFeature.PrettyFormat);
         fastConverter.setFastJsonConfig(fastJsonConfig);
         converters.add(fastConverter);
+    }
+
+    @Override
+    protected void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(authClientInterceptor).addPathPatterns("/**");
+        super.addInterceptors(registry);
+    }
+
+
+    @Autowired
+    public void setAuthClientInterceptor(AuthClientInterceptor<GlobalUserDTO> authClientInterceptor) {
+        this.authClientInterceptor = authClientInterceptor;
     }
 }

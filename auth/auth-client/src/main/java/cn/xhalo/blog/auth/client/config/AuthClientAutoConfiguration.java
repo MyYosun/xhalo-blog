@@ -2,6 +2,7 @@ package cn.xhalo.blog.auth.client.config;
 
 import cn.xhalo.blog.auth.client.enums.ErrorInfoEnum;
 import cn.xhalo.blog.auth.client.exception.AuthClientException;
+import cn.xhalo.blog.auth.client.interceptor.AuthClientInterceptor;
 import cn.xhalo.blog.auth.client.service.AuthRedisService;
 import cn.xhalo.blog.auth.client.util.SpringBeanUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -86,7 +87,7 @@ public class AuthClientAutoConfiguration {
     }
 
     @Bean(name = "authClientRedisService")
-    @ConditionalOnProperty(prefix = "cn.xhalo.auth.server", name = "useExistRedisTemplate", havingValue = "true")
+    @ConditionalOnProperty(prefix = "cn.xhalo.auth.client", name = "useExistRedisTemplate", havingValue = "true")
     public AuthRedisService authRedisServiceFromExist() {
         AuthRedisService authRedisService;
         if (StringUtils.isEmpty(authClientProperties.getTokenRedisTemplateName())) {
